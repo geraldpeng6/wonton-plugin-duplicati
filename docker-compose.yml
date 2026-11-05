@@ -48,8 +48,8 @@ x-wonton:
   kind: app
   title: { en: Duplicati }
   description:
-    zh: 把你的文档和照片加密备份到网盘或本机，丢了能原样恢复
-    en: Encrypt and back up your documents and photos to cloud storage or local disk, and restore them intact
+    zh: 把你的文档和照片加密备份到网盘或本机，丢了能恢复回来
+    en: Encrypt and back up your documents and photos to cloud storage or local disk, and get them back when lost
   icon: icon.svg
   notices: [NOTICE]
   screenshots: [screenshots/home.png]
@@ -64,11 +64,11 @@ x-wonton:
       把共享文件夹里的文档和照片加密备份到你想去的地方：S3、WebDAV 等网盘，或本机的 backups 文件夹。
 
       备份先加密再上传，存储服务商看不到内容；按块去重和压缩，增量备份只传变化的部分。误删了文件、
-      换了设备，从任意一个备份点原样恢复。
+      换了设备，从任意一个备份点把文件恢复到本机的 backups 文件夹，再从那里拷回要放的位置。
     en: |
       Back up the documents and photos in your shared folders, encrypted, to wherever you choose: S3, WebDAV and other cloud storage, or the local backups folder.
 
-      Files are encrypted before upload, so the storage provider never sees them; block-level deduplication and compression keep incremental backups small. Restore any file, from any point in time.
+      Files are encrypted before upload, so the storage provider never sees them; block-level deduplication and compression keep incremental backups small. If you delete a file or switch devices, restore it from any point in time to the local backups folder, then copy it back where you want it.
   release_notes: { zh: 第一版。, en: First release. }
   webui:
     service: duplicati
