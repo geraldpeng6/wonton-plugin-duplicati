@@ -11,7 +11,8 @@ services:
     # 官方镜像以 root 运行、不认 PUID/PGID；显式按运行用户跑，数据目录由核心交给 PUID:PGID。
     user: "${PUID}:${PGID}"
     environment:
-      # 加密 Duplicati 自己的设置数据库（含备份任务的存储凭据），核心生成的密钥。
+      # 加密服务器保存的机密值（备份任务的口令、JWT 签名密钥等），核心生成的密钥；
+      # 数据库文件本体仍是明文 SQLite（上游行为），靠 0600 属主和容器隔离保护。
       SETTINGS_ENCRYPTION_KEY: ${WONTON_SECRET_SETTINGS_ENCRYPTION_KEY}
       # 网关认出主人后在 Authorization 里带 PreAuth 令牌，Duplicati 免第二次登录；令牌只经网关注入。
       DUPLICATI__WEBSERVICE_PRE_AUTH_TOKENS: ${WONTON_SECRET_PRE_AUTH_TOKEN}
