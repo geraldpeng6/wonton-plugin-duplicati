@@ -1,57 +1,93 @@
-# 示例插件：nginx 显示一个网页，向登录的人问好。照着 README 的“写插件”换成你的应用。
-services:
-  web:
-    # 镜像按摘要固定（多架构镜像写清单列表的摘要），标签只给人看。
-    image: nginx:1.30.6-alpine@sha256:0e52bd054126cdc040b1276c0af347aeb02a41b9cfe305d6094767ac30e97949
-    # 包里的文件经 configs 交给容器（核心在启动前写进去），不能用卷挂载。
-    configs:
-      - source: site
-        target: /etc/nginx/conf.d/default.conf
-      - source: page
-        target: /usr/share/nginx/html/index.html
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/healthz"]
-      interval: 30s
-      timeout: 5s
-      start_period: 30s
-      start_interval: 1s
+# Duplicati 加密备份：只读挂载要备份的共享文件夹（documents、photos），备份目的地由主人在网页里选
+# （S3、WebDAV 等要出网），本机目的地用可写共享 backups。网页经核心网关代登录（PreAuth 令牌），不再有第二次登录。
+# 上游 MIT，镜像按清单列表（index）的摘要固定。
+name: duplicati
 
-configs:
-  site:
-    file: web/default.conf
-  page:
-    file: web/index.html
+x-duplicati-image: &image duplicati/duplicati:2.4.1.0@sha256:5df64d95abd79ddaa41897a6c234c956d6de03df767a1b8eb8c5baecf3162bbf
+
+services:
+  duplicati:
+    image: *image
+    # 官方镜像以 root 运行、不认 PUID/PGID；显式按运行用户跑，数据目录由核心交给 PUID:PGID。
+    user: "${PUID}:${PGID}"
+    environment:
+      # 加密服务器保存的机密值（备份任务的口令、JWT 签名密钥等），核心生成的密钥；
+      # 数据库文件本体仍是明文 SQLite（上游行为），靠 0600 属主和容器隔离保护。
+      SETTINGS_ENCRYPTION_KEY: ${WONTON_SECRET_SETTINGS_ENCRYPTION_KEY}
+      # 网关认出主人后在 Authorization 里带 PreAuth 令牌，Duplicati 免第二次登录；令牌只经网关注入。
+      DUPLICATI__WEBSERVICE_PRE_AUTH_TOKENS: ${WONTON_SECRET_PRE_AUTH_TOKEN}
+      # UI 密码兜底：万一令牌认证失效，主人仍能凭核心生成的密码进网页（错误提示不走静默降级）。
+      DUPLICATI__WEBSERVICE_PASSWORD: ${WONTON_SECRET_UI_PASSWORD}
+      # 网页以 <slug>.<实例名>.wonton.localhost 访问，实例名装插件时才定、Duplicati 的白名单不支持变量，
+      # 只能用 * 关闭主机名校验；能到容器里的请求只有核心网关（已校验登录）和本插件服务，暴露面不因此变大。
+      DUPLICATI__WEBSERVICE_ALLOWED_HOSTNAMES: "*"
+      # 数据目录按 PUID/PGID 挂载，Duplicati 2.4 要求精确属主，挂载场景放宽这项检查（目录本身归运行用户）。
+      DUPLICATI__ALLOW_INSECURE_DATAFOLDER: "true"
+      # 服务端字符串和日志默认中文；网页语言跟随浏览器（中文浏览器直接是中文界面）。
+      LANG: zh_CN.UTF-8
+      # 备份目的地在网页里选 S3、WebDAV 等，需要出网；代理变量由核心按 network.egress 注入。
+      TZ: "${TZ}"
+    volumes:
+      - ${WONTON_APP_DATA}/data:/data
+      # 要备份的共享文件夹只读挂载；备份目的地 backups 可写。
+      - ${WONTON_SHARE_DOCUMENTS}:/shares/documents:ro
+      - ${WONTON_SHARE_PHOTOS}:/shares/photos:ro
+      - ${WONTON_SHARE_BACKUPS}:/backups
+    healthcheck:
+      # 镜像自带的 server-util 有 health 子命令：带 /data 里的数据库自动认证，问服务端状态，退出码 0 是健康。
+      test: ["CMD", "duplicati-server-util", "health", "--hosturl=http://127.0.0.1:8200"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      start_interval: 2s
 
 x-wonton:
   spec: "0.4"
-  # 换成你自己的：反向域名形式，装上以后不能改。
-  id: app.example.hello
+  id: app.duplicati.duplicati
   version: 0.1.0
   kind: app
-  title: { zh: 你好, en: Hello }
-  description: { zh: 向登录的人问好的示例网页, en: An example page that greets whoever is signed in }
+  title: { en: Duplicati }
+  description:
+    zh: 把你的文档和照片加密备份到网盘或本机，丢了能恢复回来
+    en: Encrypt and back up your documents and photos to cloud storage or local disk, and get them back when lost
   icon: icon.svg
   notices: [NOTICE]
-  category: tools
   screenshots: [screenshots/home.png]
-  author: { name: Example }
-  homepage: https://nginx.org
-  # 应用（这里是 nginx）的许可证；插件包自己的许可证写在仓库的 LICENSE 里。
-  license: BSD-2-Clause
-  tags: [示例, example]
+  author: { name: geraldpeng6 }
+  homepage: https://duplicati.com
+  license: MIT
+  tags:
+    zh: [文件, 安全]
+    en: [Files, Security]
   about:
     zh: |
-      插件模板里的示例：网关认出主人后，经请求头把用户名交给应用，网页上就是“你好，<用户名>”。
+      把共享文件夹里的文档和照片加密备份到你想去的地方：S3、WebDAV 等网盘，或本机的 backups 文件夹。
+
+      备份先加密再上传，存储服务商看不到内容；按块去重和压缩，增量备份只传变化的部分。误删了文件、
+      换了设备，从任意一个备份点把文件恢复到本机的 backups 文件夹（共享文件夹在插件里是只读的），
+      再从那里拷回要放的位置。
     en: |
-      The example from the plugin template: once the gateway recognises the owner, it passes the user name to
-      the app in a request header, and the page says hello to them.
+      Back up the documents and photos in your shared folders, encrypted, to wherever you choose: S3, WebDAV and other cloud storage, or the local backups folder.
+
+      Files are encrypted before upload, so the storage provider never sees them; block-level deduplication and compression keep incremental backups small. If you delete a file or switch devices, restore it from any point in time to the local backups folder (your shared folders are read-only to the plugin), then copy it back where you want it.
   release_notes: { zh: 第一版。, en: First release. }
   webui:
-    service: web
-    port: 80
-    # 应用不认 OIDC 时，由网关在请求上加上用户名（README 的“网页入口和登录”）。
+    service: duplicati
+    port: 8200
+    # 网关认出主人后带 PreAuth 令牌，Duplicati 不再要密码；令牌经网关注入，客户端拿不到。
     sso: proxy
     proxy:
       headers:
-        Remote-User: "{user}"
-  permissions: []
+        Authorization: "PreAuth {secret:pre_auth_token}"
+  secrets:
+    settings_encryption_key:
+      generate: { bytes: 32 }
+    pre_auth_token:
+      generate: { bytes: 32 }
+    ui_password:
+      generate: { bytes: 32 }
+  permissions:
+    - storage.share.documents:read
+    - storage.share.photos:read
+    - storage.share.backups:write
+    - network.egress

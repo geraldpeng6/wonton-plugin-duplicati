@@ -1,14 +1,16 @@
-图标
-====
+Duplicati 标志
+==============
 
-`icon.svg` 为本仓库原创，按插件规范的线条风格手写，未用图片模型生成。从模板新建的插件换成自己的图标时，这里按实际情况重写。
+图标：Duplicati
+来源：https://github.com/duplicati/duplicati/blob/master/Assets/application%20icon/application_icon.svg（原文件 SHA-256 ca8b26a12d17bbdbb4d79d3a641b5eb260edf3387c6ec8afd4733d0d785a7755，以仓库 master 提交固定）
+版权：Copyright (c) 2026 Duplicati Inc.（取自上游 LICENSE，见 https://github.com/duplicati/duplicati/blob/master/LICENSE）
+处理：官方 application_icon.svg 的三个圆角方块（big #1D4775、middle #336697、small #65B1DD）按原布局与配色在 512×512 不透明白色画布上重绘，方块描白边以在白色底上保持图形；不改变布局、比例或颜色关系，不带圆角外框和阴影。
 
-许可证
-------
+上游许可证全文
 
 MIT License
 
-Copyright (c) 2026 Wonton plugin authors
+Copyright (c) 2026 Duplicati Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,3 +29,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+商标
+
+Duplicati 名称和标志归 Duplicati 项目及其权利人所有。这里只用它们标识本插件集成的应用，不表示与上游存在官方合作、隶属关系或获得其背书。软件许可证不授予商标权。
