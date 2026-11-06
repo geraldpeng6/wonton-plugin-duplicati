@@ -3,11 +3,10 @@
 # 上游 MIT，镜像按清单列表（index）的摘要固定。
 name: duplicati
 
-x-duplicati-image: &image duplicati/duplicati:2.4.1.0@sha256:5df64d95abd79ddaa41897a6c234c956d6de03df767a1b8eb8c5baecf3162bbf
 
 services:
   duplicati:
-    image: *image
+    image: duplicati/duplicati:2.4.1.0@sha256:5df64d95abd79ddaa41897a6c234c956d6de03df767a1b8eb8c5baecf3162bbf
     # 官方镜像以 root 运行、不认 PUID/PGID；显式按运行用户跑，数据目录由核心交给 PUID:PGID。
     user: "${PUID}:${PGID}"
     environment:
