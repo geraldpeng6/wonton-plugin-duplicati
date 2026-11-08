@@ -4,6 +4,7 @@
 web_assert() { grep -qi 'duplicati\|ngclient'; }   # stdin：SPA 首页（<title>Backup</title>，引用 ngclient）
 
 identity_check() { # 网关带 PreAuth 令牌后，systeminfo 直接返回系统信息而不是登录质询
+  SMOKE_WEB_URL="${SMOKE_WEB_URL%/}"  # 套件给的地址带尾斜杠，拼路径前剥掉，避免 // 打不进路由
   local info anon
   info="$(web_get /api/v1/systeminfo)" || { echo "systeminfo 失败：$info"; return 1; }
   grep -q '"ServerVersion"' <<<"$info" ||
