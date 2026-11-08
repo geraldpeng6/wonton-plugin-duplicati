@@ -29,9 +29,10 @@ data_write() {
   marker="wonton-smoke-$(od -An -N8 -tx1 /dev/urandom | tr -d ' \n')"
   dweb --fresh / -L >/dev/null || { echo "重建网关会话失败"; return 1; }
   out="$(web_get /api/v1/backups -X POST -H 'Content-Type: application/json' \
-    --data "$(jq -nc --arg n "$marker" '{
+    --data "$(jq -nc --arg n "$marker" --arg p "$(tr -dc a-zA-Z0-9 </dev/urandom | head -c 24)" '{
       Backup:{Name:$n,Description:"wonton smoke 数据探针，停用不跑",
-        TargetURL:"file:///data/wonton-smoke-target",Sources:["/data"],Enabled:false},
+        TargetURL:"file:///data/wonton-smoke-target",Sources:["/data"],Enabled:false,
+        Settings:[{Name:"passphrase",Value:$p}]},
       Schedule:null}')")" || { echo "建备份任务失败：$out"; return 1; }
   id="$(jq -r '.Backup.ID // .ID // empty' <<<"$out")"
   [[ -n "$id" ]] || { echo "建任务没返回 ID：$out"; return 1; }
