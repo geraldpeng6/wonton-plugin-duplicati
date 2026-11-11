@@ -1,6 +1,6 @@
 # 云吞插件：Duplicati
 
-开发流程见[插件开发指南](https://github.com/geraldpeng6/wonton-docs/blob/main/develop.md)。
+开发流程见[插件开发指南](https://github.com/wontonapp/wonton-docs/blob/main/develop.md)。
 
 这个插件把共享文件夹里的文档和照片加密备份到主人选的目的地：S3、WebDAV 等网盘，或本机的 `backups` 共享文件夹。
 备份先加密再上传，存储服务商看不到内容；支持按块去重、压缩和增量备份。恢复时文件回到本机的 `backups`
