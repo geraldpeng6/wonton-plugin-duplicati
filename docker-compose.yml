@@ -45,10 +45,10 @@ x-wonton:
   id: app.duplicati.duplicati
   version: 0.1.0
   kind: app
-  title: { en: Duplicati }
+  title: { zh: 文件备份（Duplicati）, en: File Backup (Duplicati) }
   description:
-    zh: 把你的文档和照片加密备份到网盘或本机，丢了能恢复回来
-    en: Encrypt and back up your documents and photos to cloud storage or local disk, and get them back when lost
+    zh: 给文件上保险：把共享文件夹里的文档和照片加密备份到云存储或家里的服务器上，误删了、换设备了都能找回来。它只管备份和恢复，平时存取文件还是用网盘类应用。
+    en: "Insurance for your files: back up the documents and photos in your shared folders, encrypted, to cloud storage or your home server, so you can get them back after a mistake or a new device. It only backs up and restores — use a drive app for everyday files."
   icon: icon.svg
   notices: [NOTICE]
   screenshots: [screenshots/home.png]
@@ -60,13 +60,13 @@ x-wonton:
     en: [Files, Security]
   about:
     zh: |
-      把共享文件夹里的文档和照片加密备份到你想去的地方：S3、WebDAV 等网盘，或本机的 backups 文件夹。
+      把共享文件夹里的文档和照片加密备份到你选的地方：各种云存储，或本机的 backups 文件夹。
 
       备份先加密再上传，存储服务商看不到内容；按块去重和压缩，增量备份只传变化的部分。误删了文件、
       换了设备，从任意一个备份点把文件恢复到本机的 backups 文件夹（共享文件夹在插件里是只读的），
       再从那里拷回要放的位置。
     en: |
-      Back up the documents and photos in your shared folders, encrypted, to wherever you choose: S3, WebDAV and other cloud storage, or the local backups folder.
+      Back up the documents and photos in your shared folders, encrypted, to wherever you choose: popular cloud storage services or the local backups folder.
 
       Files are encrypted before upload, so the storage provider never sees them; block-level deduplication and compression keep incremental backups small. If you delete a file or switch devices, restore it from any point in time to the local backups folder (your shared folders are read-only to the plugin), then copy it back where you want it.
   release_notes: { zh: 第一版。, en: First release. }
